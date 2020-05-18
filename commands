@@ -1,0 +1,30 @@
+source /mnt/storage/apps/software/dnanexus/0.289.1/dx-toolkit/environment
+# This bed contains all of the RefSeqs present in Nirvana 2.0.10. These are the transcripts we can assign.
+#dx download project-Fkb6Gkj433GVVvj73J7x8KbV:file-Fpz2X0Q433GVK5xxPvzqvVPB  # refseq_nirvana_2.0.10_5bp_no_PAR_Y.bed
+
+# Read through the current nirvana_genes2transcripts
+# For each transcript:
+#   if same transcript is available use it
+#   elif different version of the same transcript is available use it
+#   else N/A (no transcripts needed to be reassigned completely)
+
+while read record; do 
+  gene=$(echo $record | awk -F " " '{print $1}');
+  
+  tx203_full=$(echo $record | awk -F " " '{print $2}');  # tx with version e.g. NM_000001.1
+  tx203_base=$(echo $record | awk -F " " '{print $2}' | awk -F "." '{print $1}');  # tx without version  e.g. NM_000001
+  
+  tx2010_full=$(grep -P "\t${tx203_full}$" refseq_nirvana_2.0.10_5bp_no_PAR_Y.bed | cut -f 4 | sort | uniq); 
+  tx2010_base=$(grep -P "\t${tx203_base}\." refseq_nirvana_2.0.10_5bp_no_PAR_Y.bed | cut -f 4 | sort | uniq | grep -v $tx203_full | paste -sd "," -); 
+
+  # Gene | Old tx | New tx if full match | New tx if base match  
+  echo -e "$gene\t$tx203_full\t$tx2010_full\t$tx2010_base"; done < /mnt/storage/data/NGS/nirvana_genes2transcripts > g2t_2010_check_avail
+
+cat g2t_2010_check_avail | awk -F "\t" '$3 == "" {print}' > set_new_tx  # These ones only have a base match
+cat g2t_2010_check_avail | awk -F "\t" '$2 == $3 {print}' > use_old_tx  # These ones have a perfect match
+
+# Merge the 2 lists
+cut -f 1,2 use_old_tx >> nirvana_genes2transcripts_2010_200515_unsorted; cut -f 1,4 set_new_tx >> nirvana_genes2transcripts_2010_200515_unsorted
+
+sort -k1V -k2V nirvana_genes2transcripts_2010_200515_unsorted > nirvana_genes2transcripts_2010_200515
+
