@@ -1,6 +1,6 @@
 source /mnt/storage/apps/software/dnanexus/0.289.1/dx-toolkit/environment
 # This bed contains all of the RefSeqs present in Nirvana 2.0.10. These are the transcripts we can assign.
-#dx download project-Fkb6Gkj433GVVvj73J7x8KbV:file-Fpz2X0Q433GVK5xxPvzqvVPB  # refseq_nirvana_2.0.10_5bp_no_PAR_Y.bed
+dx download project-Fkb6Gkj433GVVvj73J7x8KbV:file-Fpz2X0Q433GVK5xxPvzqvVPB  # refseq_nirvana_2.0.10_5bp_no_PAR_Y.bed
 
 # Read through the current nirvana_genes2transcripts
 # For each transcript:
